@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  web:
+    build: ./client
+    ports:
+      - 3000:3000
+    depends_on: 
+      - api
+    volumes:
+      - ./client:/app
+  api:
+    build: .
+    command: ./wait-for-it.sh postgres:5432 -- ./docker-entrypoint.sh
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    restart: on-failure
+    environment:
+      - DB_HOST=postgres
+      - PUSHER_APP_ID=
+      - PUSHER_KEY=
+      - PUSHER_SECRET=
+      - PUSHER_CLUSTER=
+    volumes:
+      - .:/app
+  postgres:
+    image: postgres:alpine
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pusher_demo
+      - POSTGRES_PORT=5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
